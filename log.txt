@@ -1,0 +1,41 @@
+20180423142849:my-tweets
+20180423142850:Tweet: you play like you practice | Created: Sun Apr 22 04:17:03 +0000 2018
+20180423142850:Tweet: practice, practice, practice | Created: Sun Apr 22 04:16:47 +0000 2018
+20180423142850:Tweet: learning at UNC-Chapel Hill Code Boot Camp | Created: Sun Apr 22 03:34:16 +0000 2018
+20180423142910:?
+20180423142910:Valid requests are: 
+20180423142910:  my-tweets
+20180423142910:  spotify-this-song <song title>
+20180423142910:  movie <movie title>
+20180423142910:  do-what-it-says
+20180423143518:song
+20180423143518:song is not a valid request
+20180423143518:use ? to display valid requests
+20180423143947:spotify-this-song
+20180423144206:spotify-this-song
+20180423144221:spotify-this-song
+20180423144420:spotify-this-song
+20180423150621:spotify-this-song
+20180423151334:spotify-this-song
+20180423151502:spotify-this-song
+20180423152520:spotify-this-song
+20180423153137:spotify-this-song
+20180423153813:spotify-this-song
+20180423153854:spotify-this-song
+20180423154703:spotify-this-song
+20180423155353:spotify-this-song
+20180423155448:spotify-this-song
+20180423155855:spotify-this-song
+20180423160818:spotify-this-song
+20180423162610:spotify-this-song
+20180423162850:spotify-this-song
+20180423163508:spotify-this-song
+20180423163544:spotify-this-song
+20180423163733:spotify-this-song
+20180423164116:spotify-this-song
+20180423164822:spotify-this-song
+20180423164844:spotify-this-song
+20180423165006:spotify-this-song
+20180423165228:spotify-this-song
+20180423165321:spotify-this-song
+20180423170057:spotify-this-song

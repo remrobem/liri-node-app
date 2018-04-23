@@ -1,6 +1,6 @@
 const dotenv = require('dotenv').config();
 const twitter = require('twitter');
-const Spotify = require('node-spotify-api');
+const spotify = require('node-spotify-api');
 const request = require('request');
 const fs = require('fs');
 const keys = require('./keys.js');
@@ -8,7 +8,7 @@ const keys = require('./keys.js');
 let outputLogOnly = false;
 
 // Spotify variables
-// let spotifyKeys = new spotify(keys.spotify);
+let spotifyKeys = new spotify(keys.spotify);
 
 
 // Twitter variables
@@ -35,7 +35,7 @@ processCommand();
 
 function processCommand() {
     // proces the input request
-    outputLogOnly = true;
+outputLogOnly = true;
     outputProcess(command);
     outputLogOnly = false;
 
@@ -79,47 +79,26 @@ function tweets() {
 
 function song() {
 
-    let songTitle = parameterString();
-
-    let spotify = new Spotify({
-        id: 'ceb5029fb31b4621bc2793887cc86c7c',
-        secret: 'fd98057b83cd43c6ad18a4bdf9a47d8d'
-    });
-
-    let spotifyResults = new Promise(function (resolve, reject) {
-        spotify
-            .search({
-                type: 'track',
-                query: songTitle
-            }).then(response => {
-                // console.log(response);
-                // console.log('back from spotify');
-                resolve(response);
-            })
-            .catch(err => {
-                console.log(`Spotify search error occured for ${songTitle}:${err}`);
-                reject(err);
-            });
-    });
-
-    spotifyResults
-        .then((response) => {
-            // console.log('bach from search');
-             console.log(response);
-             console.log(response.tracks.items["0"].artists["0"].name);   
-             console.log(response.tracks.items["0"].name);          
-             console.log(response.tracks.items["0"].preview_url);
-             console.log(response.tracks.items["0"].album.name);
-
-
-            // let spotifySongs = JSON.parse(response);
-            //console.log(spotifySongs);
-
-            
-        })
-        .catch((err) => console.log(`Spotify search error occured for ${songTitle}:${err}`));
+    let songInfo = getSpotify(parameterString());
 };
 
+function getSpotify(songTitle) {
+
+    let spotify = new spotify({
+        id: ceb5029fb31b4621bc2793887cc86c7c,
+        secret: fd98057b83cd43c6ad18a4bdf9a47d8d
+    });
+
+    spotify.search({
+        type: 'track',
+        query: songTitle
+    }, function (err, data) {
+        if (err) {
+            return console.log(`Spotify search error occured for ${songTitle}:${err}`);
+        };
+        console.log(data);
+    });
+};
 
 function movie() {
     let movieInfo = getOMDB(parameterString());
@@ -197,12 +176,11 @@ function badCommand() {
 function outputProcess(data) {
 
     timestamp = new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 14);
-    if (!outputLogOnly) {
-        console.log(data);
-    };
+    console.log(data);
     fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
         if (err) {
             console.log(`Error appending to ${logFile}:${err}`);
         }
     });
+
 };
