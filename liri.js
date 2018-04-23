@@ -105,17 +105,38 @@ function song() {
     spotifyResults
         .then((response) => {
             // console.log('bach from search');
-             console.log(response);
-             console.log(response.tracks.items["0"].artists["0"].name);   
-             console.log(response.tracks.items["0"].name);          
-             console.log(response.tracks.items["0"].preview_url);
-             console.log(response.tracks.items["0"].album.name);
+            // console.log(response);
+            let items = response.tracks.items;
+
+            items.forEach(item => {
+                let artistList = '';
+                item.artists.forEach(artist => {
+                    artistList = artistList + artist.name + ', ';
+                })
+                outputData = (`Artists: ${artistList}`);
+                outputProcess(outputData);
+                outputData = (`Song Title: ${item.name}`);
+                outputProcess(outputData);
+                outputData = (`Preview: ${item.preview_url}`);
+                outputProcess(outputData);
+                outputData = (`Album: ${item.album.name}`);
+                outputProcess(outputData);
+
+                outputData = (`-----------------------------------------------------------------------------------`);
+                outputProcess(outputData);
+
+
+            })
+            //  console.log(response.tracks.items["0"].artists["0"].name);   
+            //  console.log(response.tracks.items["0"].name);          
+            //  console.log(response.tracks.items["0"].preview_url);
+            //  console.log(response.tracks.items["0"].album.name);
 
 
             // let spotifySongs = JSON.parse(response);
             //console.log(spotifySongs);
 
-            
+
         })
         .catch((err) => console.log(`Spotify search error occured for ${songTitle}:${err}`));
 };
@@ -200,9 +221,21 @@ function outputProcess(data) {
     if (!outputLogOnly) {
         console.log(data);
     };
-    fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
-        if (err) {
-            console.log(`Error appending to ${logFile}:${err}`);
-        }
+
+    return new Promise(function (resolve, reject) {
+        fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
+            if (err) {
+                console.log(`Error appending to ${logFile}:${err}`);
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
     });
+
+    // fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
+    //     if (err) {
+    //         console.log(`Error appending to ${logFile}:${err}`);
+    //     }
+    // });
 };
