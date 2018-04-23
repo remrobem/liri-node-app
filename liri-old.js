@@ -1,14 +1,12 @@
 const dotenv = require('dotenv').config();
 const twitter = require('twitter');
-const Spotify = require('node-spotify-api');
+const spotify = require('node-spotify-api');
 const request = require('request');
 const fs = require('fs');
 const keys = require('./keys.js');
 
-let outputLogOnly = false;
-
 // Spotify variables
-// let spotifyKeys = new spotify(keys.spotify);
+let spotifyKeys = new spotify(keys.spotify);
 
 
 // Twitter variables
@@ -35,10 +33,6 @@ processCommand();
 
 function processCommand() {
     // proces the input request
-    outputLogOnly = true;
-    outputProcess(command);
-    outputLogOnly = false;
-
     switch (command) {
 
         case `my-tweets`:
@@ -79,68 +73,26 @@ function tweets() {
 
 function song() {
 
-    let songTitle = parameterString();
-
-    let spotify = new Spotify({
-        id: 'ceb5029fb31b4621bc2793887cc86c7c',
-        secret: 'fd98057b83cd43c6ad18a4bdf9a47d8d'
-    });
-
-    let spotifyResults = new Promise(function (resolve, reject) {
-        spotify
-            .search({
-                type: 'track',
-                query: songTitle
-            }).then(response => {
-                // console.log(response);
-                // console.log('back from spotify');
-                resolve(response);
-            })
-            .catch(err => {
-                console.log(`Spotify search error occured for ${songTitle}:${err}`);
-                reject(err);
-            });
-    });
-
-    spotifyResults
-        .then((response) => {
-            // console.log('bach from search');
-            // console.log(response);
-            let items = response.tracks.items;
-
-            items.forEach(item => {
-                let artistList = '';
-                item.artists.forEach(artist => {
-                    artistList = artistList + artist.name + ', ';
-                })
-                outputData = (`Artists: ${artistList}`);
-                outputProcess(outputData);
-                outputData = (`Song Title: ${item.name}`);
-                outputProcess(outputData);
-                outputData = (`Preview: ${item.preview_url}`);
-                outputProcess(outputData);
-                outputData = (`Album: ${item.album.name}`);
-                outputProcess(outputData);
-
-                outputData = (`-----------------------------------------------------------------------------------`);
-                outputProcess(outputData);
-
-
-            })
-            //  console.log(response.tracks.items["0"].artists["0"].name);   
-            //  console.log(response.tracks.items["0"].name);          
-            //  console.log(response.tracks.items["0"].preview_url);
-            //  console.log(response.tracks.items["0"].album.name);
-
-
-            // let spotifySongs = JSON.parse(response);
-            //console.log(spotifySongs);
-
-
-        })
-        .catch((err) => console.log(`Spotify search error occured for ${songTitle}:${err}`));
+    let songInfo = getSpotify(parameterString());
 };
 
+function getSpotify(songTitle) {
+
+    let spotify = new spotify({
+        id: ceb5029fb31b4621bc2793887cc86c7c,
+        secret: fd98057b83cd43c6ad18a4bdf9a47d8d
+    });
+
+    spotify.search({
+        type: 'track',
+        query: songTitle
+    }, function (err, data) {
+        if (err) {
+            return console.log(`Spotify search error occured for ${songTitle}:${err}`);
+        };
+        console.log(data);
+    });
+ };
 
 function movie() {
     let movieInfo = getOMDB(parameterString());
@@ -158,9 +110,27 @@ function getOMDB(movieTitle) {
 
 function random() {
 
+    // function readContent(callback) {
+    //     fs.readFile("./Index.html", function (err, content) {
+    //         if (err) return callback(err)
+    //         callback(null, content)
+    //     })
+    // }
+
+    // readContent(function (err, content) {
+    //     console.log(content)
+    // })
+
+
     fs.readFile(fileName, 'utf8', function (err, data) {
         if (err) {
-            outputData = (`fs error on ${fileName}: ${err}`);
+            outputData = (`
+                            fs error on $ {
+                                fileName
+                            }: $ {
+                                err
+                            }
+                            `);
             outputProcess(outputData);
         }
         //input file can have multiple lines of requests
@@ -195,22 +165,32 @@ function parameterString() {
 };
 
 function help() {
-    outputData = (`Valid requests are: `);
+    outputData = (`
+                            Valid requests are: `);
     outputProcess(outputData);
-    outputData = (`  my-tweets`);
+    outputData = (`
+                            my - tweets `);
     outputProcess(outputData);
-    outputData = (`  spotify-this-song <song title>`);
+    outputData = (`
+                            spotify - this - song followed by a song title `);
     outputProcess(outputData);
-    outputData = (`  movie <movie title>`);
+    outputData = (`
+                            movie - this followed by a movie title `);
     outputProcess(outputData);
-    outputData = (`  do-what-it-says`);
+    outputData = (`
+                            do -what - it - says `);
     outputProcess(outputData);
 };
 
 function badCommand() {
-    outputData = (`${command} is not a valid request`);
+    outputData = (`
+                            $ {
+                                command
+                            }
+                            is not a valid request `);
     outputProcess(outputData);
-    outputData = (`use ? to display valid requests`);
+    outputData = (`
+                            use ? to diplay valid requests `);
     outputProcess(outputData);
 };
 
@@ -218,26 +198,23 @@ function badCommand() {
 function outputProcess(data) {
 
     timestamp = new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 14);
-    if (!outputLogOnly) {
-        console.log(data);
-    };
-
-    return new Promise(function (resolve, reject) {
-        fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
-            if (err) {
-                console.log(`Error appending to ${logFile}:${err}`);
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
+    console.log(data);
+    fs.appendFile(logFile, `
+                            $ {
+                                timestamp
+                            } : $ {
+                                data
+                            }\
+                            n `, function (err) {
+        if (err) {
+            console.log(`
+                            Error appending to $ {
+                                logFile
+                            }: $ {
+                                err
+                            }
+                            `);
+        }
     });
 
-
-    
-    // fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
-    //     if (err) {
-    //         console.log(`Error appending to ${logFile}:${err}`);
-    //     }
-    // });
 };
