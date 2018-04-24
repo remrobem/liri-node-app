@@ -235,6 +235,7 @@ function outputProcess(data) {
 
 
     
+    
     // fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
     //     if (err) {
     //         console.log(`Error appending to ${logFile}:${err}`);
