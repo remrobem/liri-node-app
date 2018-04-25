@@ -7,8 +7,13 @@ const keys = require('./keys.js');
 
 let outputLogOnly = false;
 
+//keys
+let omdbAPIKey = '986e832b';
+let spotifyClient = new Spotify(keys.spotify);
+let twitterClient = new twitter(keys.twitter);
+
 // Spotify variables
-// let spotifyKeys = new spotify(keys.spotify);
+let defaultSong = `The Sign`;
 
 //OMDB default values
 let songTitle = parameterString();
@@ -25,13 +30,13 @@ let twitterParams = {
 // randon variables
 let fileName = 'random.txt';
 
-// request variables
-let command = process.argv[2];
-let argument = process.argv[3];
-
 // output variables
 let logFile = 'log.txt'
 let outputData = '';
+
+// request variables
+let command = process.argv[2];
+let argument = parameterString();
 
 processCommand();
 
@@ -56,6 +61,9 @@ function processCommand() {
             random();
             break;
         case `?`:
+            help();
+            break;
+        case `help`:
             help();
             break;
         default:
@@ -84,21 +92,22 @@ function tweets() {
 
 function song() {
 
-    let songTitle = parameterString();
+    let songTitle = argument;
+    outputData = (`Song Title Requested:${songTitle}`);
+    outputProcess(outputData);
 
-    let spotify = new Spotify({
-        id: 'ceb5029fb31b4621bc2793887cc86c7c',
-        secret: 'fd98057b83cd43c6ad18a4bdf9a47d8d'
-    });
+    if (songTitle.length === 0) {
+        songTitle = defaultSong;
+        outputData = (`Default Song Title Used:${songTitle}`);
+        outputProcess(outputData);
+    };
 
     let spotifyResults = new Promise(function (resolve, reject) {
-        spotify
+        spotifyClient
             .search({
                 type: 'track',
                 query: songTitle
             }).then(response => {
-                // console.log(response);
-                // console.log('back from spotify');
                 resolve(response);
             })
             .catch(err => {
@@ -109,56 +118,111 @@ function song() {
 
     spotifyResults
         .then((response) => {
-            // console.log('bach from search');
-            // console.log(response);
+
             let items = response.tracks.items;
+            outputData = (`-----------------------------------------------------------------------------------`);
+            outputProcess(outputData);
 
             items.forEach(item => {
-                let artistList = '';
-                item.artists.forEach(artist => {
-                    artistList = artistList + artist.name + ', ';
-                })
-                outputData = (`Artists: ${artistList}`);
-                outputProcess(outputData);
-                outputData = (`Song Title: ${item.name}`);
-                outputProcess(outputData);
-                outputData = (`Preview: ${item.preview_url}`);
-                outputProcess(outputData);
-                outputData = (`Album: ${item.album.name}`);
-                outputProcess(outputData);
+                if (item.name.toLowerCase() === songTitle.toLowerCase()) {
 
-                outputData = (`-----------------------------------------------------------------------------------`);
-                outputProcess(outputData);
+                    let artistList = '';
+                    item.artists.forEach(artist => {
+                        artistList = artistList + artist.name + ', ';
+                    })
+                    outputData = (`Artists: ${artistList}`);
+                    outputProcess(outputData);
+                    outputData = (`Song Title: ${item.name}`);
+                    outputProcess(outputData);
+                    if (item.preview_url === null) {
+                        item.preview_url = `(not available)`;
+                    }
+                    outputData = (`Preview: ${item.preview_url}`);
+                    outputProcess(outputData);
+                    outputData = (`Album: ${item.album.name}`);
+                    outputProcess(outputData);
 
+                    outputData = (`-----------------------------------------------------------------------------------`);
+                    outputProcess(outputData);
+                };
 
-            })
-            //  console.log(response.tracks.items["0"].artists["0"].name);   
-            //  console.log(response.tracks.items["0"].name);          
-            //  console.log(response.tracks.items["0"].preview_url);
-            //  console.log(response.tracks.items["0"].album.name);
-
-
-            // let spotifySongs = JSON.parse(response);
-            //console.log(spotifySongs);
-
-
-        })
-        .catch((err) => console.log(`Spotify search error occured for ${songTitle}:${err}`));
+            });
+        });
 };
-
 
 function movie() {
     processMovieRequest();
 };
 
-function getOMDB(movieTitle) {
+async function processMovieRequest() {
 
-    // OMDB API goes here
+    let movie = argument;
+    outputData = (`Movie Requested:${movie}`);
+    outputProcess(outputData);
 
-    let movieInfo = {
-        'title': 'aa'
+    if (movie.length === 0) {
+        movie = defaultMovie;
+        outputData = (`Default Movie Used:${movie}`);
+        outputProcess(outputData);
     };
-    return movieInfo;
+    movie = encodeURIComponent(movie);
+    let queryURL = `https://www.omdbapi.com/?t=${movie}&type=movie&y=&plot=&apikey=${omdbAPIKey}`;
+
+
+    let movieDetails = await getMovieDetails(queryURL);
+    movieDetails = JSON.parse(movieDetails);
+
+    outputData = (`-----------------------------------------------------------------------------------`);
+    outputProcess(outputData);
+    outputData = (`Title: ${movieDetails.Title}`);
+    outputProcess(outputData);
+    outputData = (`Year: ${movieDetails.Year}`);
+    outputProcess(outputData);
+    outputData = (`IMDB Rating: ${movieDetails.imdbRating}`);
+    outputProcess(outputData);
+    let movieRatings = movieDetails.Ratings;
+    let rtRating = 'N/A';
+    movieRatings.forEach(item => {
+        if (item.Source === 'Rotten Tomatoes') {
+            rtRating = item.Value;
+        }
+    });
+    outputData = (`Rotten Tomatoes Rating: ${rtRating}`);
+    outputProcess(outputData);
+    outputData = (`Produced in: ${movieDetails.Country}`);
+    outputProcess(outputData);
+    outputData = (`Language: ${movieDetails.Language}`);
+    outputProcess(outputData);
+    outputData = (`Plot: ${movieDetails.Plot}`);
+    outputProcess(outputData);
+    outputData = (`Actors: ${movieDetails.Actors}`);
+    outputProcess(outputData);
+    outputData = (`-----------------------------------------------------------------------------------`);
+    outputProcess(outputData);
+
+};
+
+
+function getMovieDetails(query) {
+
+    return new Promise(resolve => {
+        request(query, function (error, response, body) {
+            if (error === null && response.statusCode === 200) {
+                resolve(body);
+            } else {
+                outputData = (`Something went wrong with the OMDB request`);
+                outputProcess(outputData);
+                outputData = (`Error:${error}`);
+                outputProcess(outputData);
+                outputData = (`Status Code:${response.statusCode}`);
+                outputProcess(outputData);
+                outputData = (`Body:${body}`);
+                outputProcess(outputData);
+                return;
+            }
+        });
+
+    });
 };
 
 function random() {
@@ -182,7 +246,9 @@ function random() {
             let requestItem = element.split(',');
             command = requestItem[0];
             argument = requestItem[1];
-            processCommand();
+            outputData = (`Command: ${command} Using:${argument}`);
+            outputProcess(outputData);
+            processCommand(argument);
         });
     });
 };
@@ -206,7 +272,7 @@ function help() {
     outputProcess(outputData);
     outputData = (`  spotify-this-song <song title>`);
     outputProcess(outputData);
-    outputData = (`  movie <movie title>`);
+    outputData = (`  movie-this <movie title>`);
     outputProcess(outputData);
     outputData = (`  do-what-it-says`);
     outputProcess(outputData);
@@ -228,7 +294,7 @@ function outputProcess(data) {
     };
 
     return new Promise(function (resolve, reject) {
-        fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
+        fs.appendFileSync(logFile, `${timestamp}:${data}\n`, function (err) {
             if (err) {
                 console.log(`Error appending to ${logFile}:${err}`);
                 reject(err);
@@ -237,13 +303,4 @@ function outputProcess(data) {
             }
         });
     });
-
-
-    
-    
-    // fs.appendFile(logFile, `${timestamp}:${data}\n`, function (err) {
-    //     if (err) {
-    //         console.log(`Error appending to ${logFile}:${err}`);
-    //     }
-    // });
 };
