@@ -10,9 +10,11 @@ let outputLogOnly = false;
 // Spotify variables
 // let spotifyKeys = new spotify(keys.spotify);
 
+//OMDB default values
+let songTitle = parameterString();
+let defaultMovie = `Mr. Nobody`;
 
 // Twitter variables
-let client = new twitter(keys.twitter);
 let user = 'mysta2u';
 let tweetCount = 20;
 let twitterParams = {
@@ -63,8 +65,9 @@ function processCommand() {
 
 //Twitter API to search user timeline for tweets. Each tweet is written to console log along with the Twitter create data/time
 function tweets() {
-
-    client.get('statuses/user_timeline', twitterParams, function (error, tweets, response) {
+    outputData = (`-----------------------------------------------------------------------------------`);
+    outputProcess(outputData);
+    twitterClient.get('statuses/user_timeline', twitterParams, function (error, tweets, response) {
         if (!error) {
             console.log(`Last ${tweetCount} tweets for @${user}:`)
             tweets.forEach(tweet => {
@@ -75,6 +78,8 @@ function tweets() {
             console.log(`Twitter Error: ${error}`);
         }
     });
+    outputData = (`-----------------------------------------------------------------------------------`);
+    outputProcess(outputData);
 };
 
 function song() {
@@ -143,7 +148,7 @@ function song() {
 
 
 function movie() {
-    let movieInfo = getOMDB(parameterString());
+    processMovieRequest();
 };
 
 function getOMDB(movieTitle) {
@@ -187,9 +192,9 @@ function parameterString() {
     let parameters = process.argv.slice(3, process.argv.length);
     let parameterStr = '';
     parameters.forEach((word) => {
-        parameterStr = parameterStr + ' ' + word;
+        parameterStr += ' ' + word;
     });
-    // remove the 1st character from the string. Not sure why it is getting added.
+    // remove the 1st character from the string.
     parameterStr = parameterStr.substring(1);
     return parameterStr;
 };
