@@ -1,11 +1,5 @@
-<<<<<<< HEAD
-spotify-this-song,"I Want it That Way"
-my-tweets,remrobem
-||||||| merged common ancestors
-spotify-this-song,"I Want it That Way"
-=======
-spotify-this-song,"I Want it That Way"
-my-tweets,remrobem
+spotify-this-song,"Dude"
+my-tweets
 movie-this,"Star Wars"
+movie-this,"Napoleon Dynamite"
 spotify-this-song,"help me"
->>>>>>> added obdb search
